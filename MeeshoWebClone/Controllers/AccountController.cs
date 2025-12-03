@@ -62,7 +62,8 @@ namespace MeeshoWebClone.Controllers
             {
                 UserName = model.Email,
                 Email = model.Email,
-                PhoneNumber = model.PhoneNumber
+                PhoneNumber = model.PhoneNumber,
+                Status = VerificationStatus.Approved // Set as approved, email verification will be used instead
             };
 
             var result = await _userManager.CreateAsync(user, model.Password!);
@@ -71,9 +72,34 @@ namespace MeeshoWebClone.Controllers
             {
                 await _userManager.AddToRoleAsync(user, model.Role);
 
-                TempData["VerificationSource"] = "Signup";
+                // Generate email confirmation token and send verification email
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var confirmationLink = Url.Action("ConfirmEmail", "Account",
+                    new { userId = user.Id, token = token }, Request.Scheme);
 
-                return RedirectToAction("Verify", "Account");
+                if (string.IsNullOrEmpty(confirmationLink))
+                {
+                    _logger.LogError("Failed to generate confirmation link for user {Email}", user.Email);
+                    ModelState.AddModelError("", "Failed to create account. Please try again.");
+                    // Delete the created user since we can't send verification email
+                    await _userManager.DeleteAsync(user);
+                    return View(model);
+                }
+
+                try
+                {
+                    await _emailService.SendEmailConfirmationAsync(user.Email!, confirmationLink);
+                    _logger.LogInformation("Email confirmation sent successfully to {Email}", user.Email);
+                    return RedirectToAction("Login", "Account", new { emailVerificationSent = true });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send email confirmation to {Email}", user.Email);
+                    // Delete the created user since email sending failed
+                    await _userManager.DeleteAsync(user);
+                    ModelState.AddModelError("", "Failed to send verification email. Please try again or check your email address.");
+                    return View(model);
+                }
             }
 
             foreach (var error in result.Errors)
@@ -116,13 +142,15 @@ namespace MeeshoWebClone.Controllers
                     return View(model);
                 }
 
-                if (user.Status == VerificationStatus.Pending)
+                // Check if email is verified
+                if (!user.EmailConfirmed)
                 {
-                    ModelState.AddModelError("Email", "Your account is pending verification.");
+                    ModelState.AddModelError("Email", "Please verify your email address before logging in. Check your inbox for the verification link.");
                     ViewBag.LastLoginMethod = "email";
                     return View(model);
                 }
-                else if (user.Status == VerificationStatus.Rejected)
+
+                if (user.Status == VerificationStatus.Rejected)
                 {
                     ModelState.AddModelError("Email", "Your account is rejected. reach out to support.");
                     ViewBag.LastLoginMethod = "email";
@@ -158,13 +186,15 @@ namespace MeeshoWebClone.Controllers
                     return View(model);
                 }
 
-                if (user.Status == VerificationStatus.Pending)
+                // Check if email is verified
+                if (!user.EmailConfirmed)
                 {
-                    ModelState.AddModelError("PhoneNumber", "Your account is pending verification.");
+                    ModelState.AddModelError("PhoneNumber", "Please verify your email address before logging in. Check your inbox for the verification link.");
                     ViewBag.LastLoginMethod = "phone";
                     return View(model);
                 }
-                else if (user.Status == VerificationStatus.Rejected)
+
+                if (user.Status == VerificationStatus.Rejected)
                 {
                     ModelState.AddModelError("PhoneNumber", "Your account is rejected. reach out to support.");
                     ViewBag.LastLoginMethod = "phone";
@@ -172,10 +202,7 @@ namespace MeeshoWebClone.Controllers
                 }
 
                 await _signInManager.SignInAsync(user, model.RememberMe);
-
-                TempData["VerificationSource"] = "Login";
-
-                return RedirectToAction("Verify", "Account");
+                return RedirectToAction("Index", "Home");
             }
 
             return View(model);
@@ -247,6 +274,30 @@ namespace MeeshoWebClone.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        public async Task<IActionResult> ConfirmEmail(string? userId, string? token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", new { emailConfirmationFailed = true });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return RedirectToAction("Login", new { emailConfirmationFailed = true });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Email confirmed successfully for user {Email}", user.Email);
+                return RedirectToAction("Login", new { emailConfirmed = true });
+            }
+
+            _logger.LogWarning("Email confirmation failed for user {Email}", user.Email);
+            return RedirectToAction("Login", new { emailConfirmationFailed = true });
         }
 
         public IActionResult ForgotPassword()

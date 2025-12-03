@@ -7,6 +7,9 @@
     var deleted = Context.Request.Query["deleted"];
     var accountVerified = Context.Request.Query["accountVerified"];
     var passwordReset = Context.Request.Query["passwordReset"];
+    var emailVerificationSent = Context.Request.Query["emailVerificationSent"];
+    var emailConfirmed = Context.Request.Query["emailConfirmed"];
+    var emailConfirmationFailed = Context.Request.Query["emailConfirmationFailed"];
 }
 
 <div class="container mt-5">
@@ -51,6 +54,27 @@
                 {
                     <div class="alert alert-success small p-2">
                         <i class="bi bi-check-circle-fill mr-1 ml-2"></i> Your password has been reset successfully. Please login with your new password.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(emailVerificationSent) && emailVerificationSent == "True")
+                {
+                    <div class="alert alert-info small p-2">
+                        <i class="bi bi-envelope-check-fill mr-1 ml-2"></i> Account created! Please check your email and click the verification link to activate your account.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(emailConfirmed) && emailConfirmed == "True")
+                {
+                    <div class="alert alert-success small p-2">
+                        <i class="bi bi-check-circle-fill mr-1 ml-2"></i> Email verified successfully! You can now login to your account.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(emailConfirmationFailed) && emailConfirmationFailed == "True")
+                {
+                    <div class="alert alert-danger small p-2">
+                        <i class="bi bi-x-circle-fill mr-1 ml-2"></i> Email verification failed. The link may be invalid or expired.
                     </div>
                 }
 
