@@ -243,5 +243,85 @@ namespace MeeshoWebClone.Controllers
         {
             return View();
         }
+
+        public IActionResult ForgotPassword()
+        {
+            if (_signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+            if (user != null && !user.IsDeleted)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                var resetLink = Url.Action("ResetPassword", "Account",
+                    new { email = user.Email, token = token }, Request.Scheme);
+
+                // In a production environment, you would send this link via email
+                // For demonstration purposes, we'll store it in TempData
+                TempData["ResetLink"] = resetLink;
+            }
+
+            // Always redirect to prevent email enumeration attacks
+            return RedirectToAction("ForgotPassword", new { emailSent = true });
+        }
+
+        public IActionResult ResetPassword(string? email, string? token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email!);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return RedirectToAction("Login", new { passwordReset = true });
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token!, model.Password!);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Login", new { passwordReset = true });
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(model);
+        }
     }
 }
