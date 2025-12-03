@@ -9,6 +9,10 @@ namespace MeeshoWebClone.Models
         public VerificationStatus Status { get; set; } = VerificationStatus.Pending;
         public bool IsDeleted { get; set; } = false;
 
+        // Phone login OTP fields
+        public string? PhoneLoginOtp { get; set; }
+        public DateTime? PhoneLoginOtpExpiry { get; set; }
+
         public virtual List<Product> Products { get; set; } = new List<Product>();
         public virtual List<CartItem> CartItems { get; set; } = new List<CartItem>();
         public virtual List<UserLikedProduct> LikedProducts { get; set; } = new List<UserLikedProduct>();

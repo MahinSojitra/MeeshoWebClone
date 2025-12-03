@@ -6,6 +6,7 @@ using MeeshoWebClone.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace MeeshoWebClone.Controllers
 {
@@ -201,8 +202,30 @@ namespace MeeshoWebClone.Controllers
                     return View(model);
                 }
 
-                await _signInManager.SignInAsync(user, model.RememberMe);
-                return RedirectToAction("Index", "Home");
+                // Generate cryptographically secure OTP and send to user's email
+                var otp = RandomNumberGenerator.GetInt32(1000, 10000).ToString("D4");
+                user.PhoneLoginOtp = otp;
+                user.PhoneLoginOtpExpiry = DateTime.UtcNow.AddMinutes(5);
+                await _userManager.UpdateAsync(user);
+
+                try
+                {
+                    await _emailService.SendLoginOtpEmailAsync(user.Email!, otp);
+                    _logger.LogInformation("Login OTP sent successfully to {Email} for phone login", user.Email);
+                    
+                    // Store user ID and remember me preference in TempData for OTP verification
+                    TempData["PhoneLoginUserId"] = user.Id.ToString();
+                    TempData["PhoneLoginRememberMe"] = model.RememberMe.ToString();
+                    
+                    return RedirectToAction("VerifyPhoneLoginOtp", new { otpSent = true });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send login OTP email to {Email}", user.Email);
+                    ModelState.AddModelError("PhoneNumber", "Failed to send OTP. Please try again.");
+                    ViewBag.LastLoginMethod = "phone";
+                    return View(model);
+                }
             }
 
             return View(model);
@@ -242,6 +265,66 @@ namespace MeeshoWebClone.Controllers
 
             ModelState.AddModelError("OTP", "Invalid OTP.");
             return View(model);
+        }
+
+        public IActionResult VerifyPhoneLoginOtp()
+        {
+            if (TempData.Peek("PhoneLoginUserId") == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyPhoneLoginOtp(OTPViewModel model)
+        {
+            var userIdStr = TempData.Peek("PhoneLoginUserId") as string;
+            var rememberMeStr = TempData.Peek("PhoneLoginRememberMe") as string;
+
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(userIdStr);
+            if (user == null)
+            {
+                ModelState.AddModelError("OTP", "Session expired. Please try again.");
+                return View(model);
+            }
+
+            // Check if OTP is valid and not expired (format OTP with leading zeros for comparison)
+            var enteredOtp = model.OTP.ToString("D4");
+            if (user.PhoneLoginOtp != enteredOtp || 
+                user.PhoneLoginOtpExpiry == null || 
+                user.PhoneLoginOtpExpiry < DateTime.UtcNow)
+            {
+                ModelState.AddModelError("OTP", "Invalid or expired OTP. Please try again.");
+                return View(model);
+            }
+
+            // Clear OTP after successful verification
+            user.PhoneLoginOtp = null;
+            user.PhoneLoginOtpExpiry = null;
+            await _userManager.UpdateAsync(user);
+
+            // Clear TempData
+            TempData.Remove("PhoneLoginUserId");
+            TempData.Remove("PhoneLoginRememberMe");
+
+            // Sign in the user
+            var rememberMe = bool.TryParse(rememberMeStr, out var rm) && rm;
+            await _signInManager.SignInAsync(user, rememberMe);
+
+            _logger.LogInformation("User {Email} logged in successfully via phone with OTP verification", user.Email);
+            return RedirectToAction("Index", "Home");
         }
 
         public async Task<IActionResult> Logout()
