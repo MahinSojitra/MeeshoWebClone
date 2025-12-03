@@ -1,6 +1,7 @@
 ﻿using MeeshoWebClone.Data;
 using MeeshoWebClone.Enums;
 using MeeshoWebClone.Models;
+using MeeshoWebClone.Services;
 using MeeshoWebClone.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +14,16 @@ namespace MeeshoWebClone.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly MeeshoAppDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, MeeshoAppDbContext context)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, MeeshoAppDbContext context, IEmailService emailService, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         public IActionResult Signup()
@@ -270,9 +275,17 @@ namespace MeeshoWebClone.Controllers
                 var resetLink = Url.Action("ResetPassword", "Account",
                     new { email = user.Email, token = token }, Request.Scheme);
 
-                // In a production environment, you would send this link via email
-                // For demonstration purposes, we'll store it in TempData
-                TempData["ResetLink"] = resetLink;
+                // Send password reset email
+                try
+                {
+                    await _emailService.SendPasswordResetEmailAsync(user.Email!, resetLink!);
+                    _logger.LogInformation("Password reset email sent successfully to {Email}", user.Email);
+                }
+                catch (Exception ex)
+                {
+                    // Log the error but don't expose it to the user to prevent email enumeration attacks
+                    _logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
+                }
             }
 
             // Always redirect to prevent email enumeration attacks

@@ -1,5 +1,6 @@
 using MeeshoWebClone.Data;
 using MeeshoWebClone.Models;
+using MeeshoWebClone.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,9 @@ builder.Services.AddMediatR(cfg =>
 // Add database service.
 builder.Services.AddDbContext<MeeshoAppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MeeshoDbContext")));
+
+// Add Email service
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add Identity services.
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
