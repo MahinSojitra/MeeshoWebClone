@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Meesho</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <img src="~/assets/meesho-logo.svg" alt="Meesho" width="156" height="36">
+                </a>
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-between" id="navbarContent">
+                    <div class="search-container">
+                        <div class="search-box d-flex align-items-center">
+                            <i class="bi bi-search"></i>
+                            <input type="search" class="form-control" id="searchInput" placeholder="Try Saree, Kurti or Search by Product Code">
+                        </div>
+
+                        <div class="dropdown-menu w-auto" id="searchDropdown">
+                            <h6 class="m-2 fw-bold">Popular Searches</h6>
+                            <div class="d-flex flex-wrap">
+                                <span class="search-pill">saree</span>
+                                <span class="search-pill">short kurti</span>
+                                <span class="search-pill">kurti</span>
+                                <span class="search-pill">tshirt</span>
+                                <span class="search-pill">top for women</span>
+                                <span class="search-pill">earring</span>
+                                <span class="search-pill">watch</span>
+                                <span class="search-pill">shoes</span>
+                                <span class="search-pill">kurti set</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column flex-lg-row align-items-end justify-content-end">
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <partial name="_CategoryNavbar" />
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

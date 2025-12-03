@@ -1,0 +1,157 @@
+﻿@model MeeshoWebClone.Areas.Admin.ViewModels.UserDisplayViewModel
+@using MeeshoWebClone.Enums
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header p-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Avatar -->
+                <div class="rounded-circle overflow-hidden border border-2" style="width: 65px; height: 65px;">
+                    <img src="~/assets/user-avatar.png" class="w-100 h-100 object-fit-cover" alt="User Avatar">
+                </div>
+
+                <!-- Email and Role -->
+                <div class="d-flex flex-column">
+                    <h4 class="text-primary fw-bold mb-0">@Model.Email</h4>
+                    <span class="text-muted small fw-semibold mt-0">
+                        <i class="bi bi-person-badge"></i> @Model.Role
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                @if (Model.IsDeleted)
+                {
+                    <span class="badge bg-light text-danger border border-2 fs-6 p-2" style="border-style: dashed !important;">
+                        <i class="bi bi-trash-fill"></i> Deleted
+                    </span>
+                }
+
+                <!-- Status Badge -->
+                <span class="badge bg-light text-@(
+                    Model.Status == VerificationStatus.Approved ? "success" :
+                    Model.Status == VerificationStatus.Rejected ? "danger" :
+                    "secondary"
+                ) border border-2 fs-6 p-2">
+                    <i class="bi bi-@(
+                        Model.Status == VerificationStatus.Approved ? "check-circle-fill text-success" :
+                        Model.Status == VerificationStatus.Rejected ? "x-circle-fill text-danger" :
+                        "clock-fill text-secondary"
+                        )">
+                    </i>
+                    @Model.Status
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <!-- First Column -->
+                <div class="col-md-6">
+
+                    <dl class="row">
+                        <dt class="col-sm-4">User Name</dt>
+                        <dd class="col-sm-8">@Model.UserName</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Phone Number</dt>
+                        <dd class="col-sm-8">@Model.PhoneNumber</dd>
+
+                        <dt class="col-sm-4">Normalized UserName</dt>
+                        <dd class="col-sm-8">@Model.NormalizedUserName</dd>
+
+                        <dt class="col-sm-4">Normalized Email</dt>
+                        <dd class="col-sm-8">@Model.NormalizedEmail</dd>
+
+                        <dt class="col-sm-4">Security Stamp</dt>
+                        <dd class="col-sm-8">@Model.SecurityStamp</dd>
+
+                        <dt class="col-sm-4">Concurrency Stamp</dt>
+                        <dd class="col-sm-8">@Model.ConcurrencyStamp</dd>
+                    </dl>
+                </div>
+
+                <!-- Second Column -->
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Email Confirmed</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@(Model.EmailConfirmed ? "success" : "danger")">
+                                @(Model.EmailConfirmed ? "Yes" : "No")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Phone Number Confirmed</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@(Model.PhoneNumberConfirmed ? "success" : "danger")">
+                                @(Model.PhoneNumberConfirmed ? "Yes" : "No")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Two Factor Enabled</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@(Model.TwoFactorEnabled ? "success" : "danger")">
+                                @(Model.TwoFactorEnabled ? "Yes" : "No")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Lockout Enabled</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@(Model.LockoutEnabled ? "success" : "danger")">
+                                @(Model.LockoutEnabled ? "Yes" : "No")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Lockout End</dt>
+                        <dd class="col-sm-8">
+                            @(Model.LockoutEnd.HasValue ? Model.LockoutEnd.Value.ToString("dd MMM yyyy HH:mm") : "N/A")
+                        </dd>
+
+                        <dt class="col-sm-4">Access Failed Count</dt>
+                        <dd class="col-sm-8">@Model.AccessFailedCount</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <div>
+                <a asp-action="Index" class="btn btn-light border border-2 fw-bold">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+            <div class="d-flex gap-2">
+                @if (Model.Status == VerificationStatus.Pending)
+                {
+                    <a asp-action="Approve" asp-route-id="@Model.Id" class="btn btn-light fw-bold text-success border border-2">
+                        <i class="bi bi-check-circle"></i> Approve
+                    </a>
+                    <a asp-action="Reject" asp-route-id="@Model.Id" class="btn btn-light fw-bold text-danger border border-2">
+                        <i class="bi bi-x-circle"></i> Reject
+                    </a>
+                }
+
+                @if (Model.IsDeleted)
+                {
+                    <!-- Undo Delete Button -->
+                    <a asp-action="UndoDelete" asp-route-id="@Model.Id" class="btn btn-light fw-bold text-success border border-2">
+                        <i class="bi bi-arrow-counterclockwise"></i> Undo Delete
+                    </a>
+                }
+                else
+                {
+                    <!-- Delete Button -->
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-light fw-bold text-danger border border-2">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

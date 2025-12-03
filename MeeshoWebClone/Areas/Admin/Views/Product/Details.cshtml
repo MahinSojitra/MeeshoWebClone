@@ -1,0 +1,185 @@
+﻿@using System.Globalization
+@using System
+@model MeeshoWebClone.ViewModels.ProductDisplayViewModel
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+@functions {
+    public static string GetRelativeTime(DateTime dateTime)
+    {
+        var span = DateTime.UtcNow - dateTime.ToUniversalTime();
+
+        if (span.TotalSeconds < 60)
+            return span.Seconds <= 1 ? "Just now" : $"{span.Seconds} seconds ago";
+        if (span.TotalMinutes < 60)
+            return span.Minutes == 1 ? "1 minute ago" : $"{span.Minutes} minutes ago";
+        if (span.TotalHours < 24)
+            return span.Hours == 1 ? "1 hour ago" : $"{span.Hours} hours ago";
+        if (span.TotalDays < 2)
+            return "Yesterday";
+        if (span.TotalDays < 30)
+            return $"{span.Days} days ago";
+        if (span.TotalDays < 365)
+        {
+            int months = (int)(span.TotalDays / 30);
+            return months == 1 ? "1 month ago" : $"{months} months ago";
+        }
+
+        int years = (int)(span.TotalDays / 365);
+        return years == 1 ? "1 year ago" : $"{years} years ago";
+    }
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header p-4">
+            <h5 class="mb-0">@Model.Name</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Product Image Slider -->
+                <div class="col-md-5">
+                    @if (Model.ImagesData != null && Model.ImagesData.Any())
+                    {
+                        <div id="productCarousel" class="carousel carousel-dark slide" data-bs-ride="carousel" data-bs-interval="3000">
+                            <!-- Carousel Indicators -->
+                            <div class="carousel-indicators">
+                                @for (int i = 0; i < Model.ImagesData.Count; i++)
+                                {
+                                    <button type="button" data-bs-target="#productCarousel"
+                                            data-bs-slide-to="@i"
+                                            class="@(i == 0 ? "active" : "")"
+                                            aria-current="@(i == 0 ? "true" : "false")"
+                                            aria-label="Slide @(i + 1)">
+                                    </button>
+                                }
+                            </div>
+
+                            <div class="carousel-inner">
+                                @for (int i = 0; i < Model.ImagesData.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(Model.ImagesData[i])"
+                                             class="d-block w-100 rounded"
+                                             alt="Product Image">
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Carousel Controls -->
+                            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="/images/no-image.png" class="img-fluid rounded" alt="No Image Available">
+                    }
+                </div>
+
+                <!-- Product Details -->
+                <div class="col-md-7">
+                    <h4 class="text-success fw-bold">₹@Model.DiscountedPrice <del class="text-muted">₹@Model.Price</del></h4>
+                    <p>@Model.Description</p>
+
+                    <div class="mb-3">
+                        <span class="badge bg-warning text-dark me-2">
+                            <i class="bi bi-star-fill"></i> @Model.Rating
+                        </span>
+                        <small class="text-muted">(@Model.ReviewCount reviews)</small>
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Discount</dt>
+                        <dd class="col-sm-8">@Model.DiscountPercentage%</dd>
+
+                        <dt class="col-sm-4">Stock</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@(Model.StockQuantity > 0 ? "success" : "danger")">
+                                @(Model.StockQuantity > 0 ? "In Stock" : "Out of Stock")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Free Delivery</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@(Model.FreeDelivery ? "info" : "secondary")">
+                                @(Model.FreeDelivery ? "Yes" : "No")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Category</dt>
+                        <dd class="col-sm-8">@Model.CategoryName</dd>
+
+                        <dt class="col-sm-4">Seller</dt>
+                        <dd class="col-sm-8">
+                            @Model.SellerName <br>
+                            <small class="text-muted">(@Model.SellerLocation)</small>
+                        </dd>
+
+                        <dt class="col-sm-4">Available Colors</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.AvailableColors.Any())
+                            {
+                                foreach (var color in Model.AvailableColors)
+                                {
+                                    <span class="badge bg-secondary">@color</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">No colors available</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Available Sizes</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.AvailableSizes.Any())
+                            {
+                                foreach (var size in Model.AvailableSizes)
+                                {
+                                    <span class="badge bg-primary">@size</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">No sizes available</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Created At</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-light text-success border border-1" style="font-size: 0.75rem;">
+                                @Model.CreatedAt.ToString("dd MMM yyyy, h:mm tt")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Last Updated</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-light text-success border border-1" style="font-size: 0.75rem;">
+                                @GetRelativeTime(Model.UpdatedAt)
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <div>
+                <a asp-action="Index" class="btn btn-light border border-2 fw-bold"><i class="bi bi-arrow-left"></i> Back </a>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Delete" asp-route-id="@Model.ProductId" class="btn btn-light fw-bold text-danger border border-2"><i class="bi bi-trash"></i> Delete</a>
+                <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-light fw-bold text-success border border-2"><i class="bi bi-pencil"></i> Edit</a>
+            </div>
+        </div>
+    </div>
+</div>

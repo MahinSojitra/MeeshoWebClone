@@ -1,0 +1,287 @@
+﻿@model MeeshoWebClone.Areas.Admin.ViewModels.ProductEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="container mt-4">
+    <div class="card p-3">
+        <div class="card-header">
+            <h5 class="text-center mb-0">Edit Product</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger error-font"></div>
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="RowVersion" value="@Convert.ToBase64String(Model.RowVersion)" />
+
+                <div class="row">
+                    <!-- Product Name -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" asp-for="Name" placeholder="Product Name" required>
+                            <label>Product Name</label>
+                        </div>
+                        <span class="text-danger fw-normal error-font" asp-validation-for="Name"></span>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating">
+                            <select class="form-select" asp-for="SelectedCategoryId" required>
+                                <option value="" disabled>Select Category</option>
+                                @foreach (var category in Model.AvailableCategories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                            <label>Category</label>
+                        </div>
+                        <span class="text-danger fw-normal error-font" asp-validation-for="SelectedCategoryId"></span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <div class="form-floating">
+                        <textarea class="form-control" asp-for="Description" placeholder="Description" style="height: 100px" required></textarea>
+                        <label>Description</label>
+                    </div>
+                    <span class="text-danger fw-normal error-font" asp-validation-for="Description"></span>
+                </div>
+
+                <div class="row">
+                    <!-- Price -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" asp-for="Price" placeholder="Price" required>
+                            <label>Price</label>
+                        </div>
+                        <span class="text-danger fw-normal error-font" asp-validation-for="Price"></span>
+                    </div>
+
+                    <!-- Discounted Price -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" asp-for="DiscountedPrice" placeholder="Discounted Price">
+                            <label>Discounted Price</label>
+                        </div>
+                        <span class="text-danger fw-normal error-font" asp-validation-for="DiscountedPrice"></span>
+                    </div>
+
+                    <!-- Discount Percentage -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" asp-for="DiscountPercentage" placeholder="Discount Percentage">
+                            <label>Discount Percentage</label>
+                        </div>
+                        <span class="text-danger fw-normal error-font" asp-validation-for="DiscountPercentage"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    @if (Model.IsSeller)
+                    {
+                        <!-- Readonly Seller Name (For Logged-in Sellers) -->
+                        <div class="col-md-4 mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" asp-for="SelectedSellerId" readonly>
+                                <div class="form-text">You can't change it. It's auto-fetched.</div>
+                                <label>Seller ID</label>
+                            </div>
+                            <input type="hidden" asp-for="SelectedSellerId"> <!-- Ensure the Seller ID is submitted -->
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Seller Selection Dropdown (For Admins) -->
+                        <div class="col-md-4 mb-3">
+                            <div class="form-floating">
+                                <select class="form-select" asp-for="SelectedSellerId" id="SelectedSellerId" required>
+                                    <option value="" disabled selected>Select Seller</option>
+                                    @foreach (var seller in Model.AvailableSellers)
+                                    {
+                                        <option value="@seller.Value">@seller.Text</option>
+                                    }
+                                </select>
+                                <label>Seller</label>
+                            </div>
+                            <span class="text-danger error-font fw-normal" asp-validation-for="SelectedSellerId"></span>
+                        </div>
+                    }
+
+                    <!-- Seller Name -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" asp-for="SellerName" id="SellerName" placeholder="Seller Name" readonly>
+                            <div class="form-text">You can't change it. It's auto-fetched.</div>
+                            <label>Seller Name</label>
+                        </div>
+                        <span class="text-danger error-font fw-normal" asp-validation-for="SellerName"></span>
+                    </div>
+
+                    <!-- Seller Location -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" asp-for="SellerLocation" placeholder="Seller Location">
+                            <label>Seller Location</label>
+                        </div>
+                        <span class="text-danger error-font fw-normal" asp-validation-for="SellerLocation"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Stock Quantity -->
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" asp-for="StockQuantity" placeholder="Stock Quantity" required>
+                            <label>Stock Quantity</label>
+                        </div>
+                        <span class="text-danger fw-normal error-font" asp-validation-for="StockQuantity"></span>
+                    </div>
+
+                    <!-- Free Delivery (Toggle Button) -->
+                    <div class="col-md-6 mb-3 d-flex align-items-center">
+                        <label class="form-label me-2">Free Delivery</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" asp-for="FreeDelivery" id="freeDeliveryToggle">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload & Preview -->
+                <div class="mb-3">
+                    <label class="form-label">Product Images</label>
+                    <input type="file" class="form-control" id="imageUpload" asp-for="NewImages" multiple accept="image/*">
+                    <span class="text-danger fw-normal error-font" asp-validation-for="NewImages"></span>
+
+                    <!-- Existing Images -->
+                    <div id="imagePreview" class="mt-2 row gap-2 px-3 flex-wrap">
+                        @for (var i = 0; i < Model.ExistingImages.Count; i++)
+                        {
+                            <div class="col mb-2 d-grid position-relative border border-1 rounded rounded-2">
+                                <img src="data:image/png;base64,@Convert.ToBase64String(Model.ExistingImages[i])" class="img-fluid" style="max-width: 80%; height: auto;">
+                                <input type="checkbox" name="ImageIdsToRemove" value="@Model.ExistingImageIds[i]" class="position-absolute top-0 end-0 m-1">
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Colors -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Available Colors</label>
+                        <div class="border rounded p-2" style="max-height: 120px; overflow-y: auto;">
+                            @foreach (var color in Model.AvailableColors)
+                            {
+                                <div class="form-check d-flex align-items-center">
+                                    <input class="form-check-input me-2" type="checkbox" name="SelectedColorIds" value="@color.ColorId" @(Model.SelectedColorIds.Contains(color.ColorId) ? "checked" : "")>
+                                    <label class="form-check-label d-flex align-items-center">
+                                        <span class="rounded-circle border me-2" style="width: 20px; height: 20px; background-color: @color.ColorHex;"></span>
+                                        @color.ColorName
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Sizes -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Available Sizes</label>
+                        <div class="border rounded p-2" style="max-height: 120px; overflow-y: auto;">
+                            @foreach (var size in Model.AvailableSizes)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="SelectedSizeIds" value="@size.SizeId" @(Model.SelectedSizeIds.Contains(size.SizeId) ? "checked" : "")>
+                                    <label class="form-check-label">@size.Size</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-content-between">
+                    <div class="col">
+                        <button type="submit" class="btn btn-success fw-bold">Save Changes</button>
+                    </div>
+                    <div class="col text-end">
+                        <a asp-action="Index" class="btn btn-light fw-bold border border-1">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const imageUpload = document.getElementById("imageUpload");
+            const imagePreview = document.getElementById("imagePreview");
+            const priceInput = document.getElementById("Price");
+            const discountedPriceInput = document.getElementById("DiscountedPrice");
+            const discountPercentageInput = document.getElementById("DiscountPercentage");
+            const sellerDropdown = document.getElementById("SelectedSellerId");
+            const sellerNameInput = document.getElementById("SellerName");
+
+            function previewImages() {
+                Array.from(imageUpload.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const div = document.createElement("div");
+                        div.classList.add("col", "mb-2", "d-grid", "position-relative", "border", "border-1", "rounded", "rounded-2");
+
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="img-fluid" style="max-width: 80%; height: auto; display: block; margin: auto;">
+                            <button type="button" class="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-1 remove-new-image">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        `;
+
+                        imagePreview.appendChild(div);
+
+                        // Add event listener to remove images dynamically
+                        div.querySelector(".remove-new-image").addEventListener("click", function () {
+                            div.remove();
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            function calculateDiscountPrice() {
+                const price = parseFloat(priceInput.value);
+                const discountPercentage = parseFloat(discountPercentageInput.value);
+
+                if (!isNaN(price) && !isNaN(discountPercentage)) {
+                    const discountPrice = price - (price * discountPercentage / 100);
+                    discountedPriceInput.value = discountPrice.toFixed(2);
+                }
+            }
+
+            function calculateDiscountPercentage() {
+                const price = parseFloat(priceInput.value);
+                const discountedPrice = parseFloat(discountedPriceInput.value);
+
+                if (!isNaN(price) && !isNaN(discountedPrice) && price > 0) {
+                    const discountPercentage = ((price - discountedPrice) / price) * 100;
+                    discountPercentageInput.value = discountPercentage.toFixed(2);
+                }
+            }
+
+            if (sellerDropdown) {
+                sellerDropdown.addEventListener("change", function () {
+                    const selectedSeller = sellerDropdown.options[sellerDropdown.selectedIndex].text;
+                    sellerNameInput.value = selectedSeller;
+                });
+            }
+
+            imageUpload.addEventListener("change", previewImages);
+            discountPercentageInput.addEventListener("input", calculateDiscountPrice);
+            discountedPriceInput.addEventListener("input", calculateDiscountPercentage);
+        });
+    </script>
+}

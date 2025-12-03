@@ -1,0 +1,42 @@
+﻿<div class="d-flex border border-1 justify-content-between align-items-center bg-white p-3 rounded">
+    <h4 class="fw-bold m-0">Products For You</h4>
+    <div>
+        <label class="fw-medium mr-2 mb-0">Sort by:</label>
+        <select class="form-select d-inline w-auto" id="sortSelect">
+            <option value="" selected disabled>Select one</option>
+            <option value="low-to-high">Price: Low to High</option>
+            <option value="high-to-low">Price: High to Low</option>
+            <option value="best-rated">Best Rated</option>
+        </select>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const sortSelect = document.getElementById("sortSelect");
+        const productGrid = document.getElementById("productGrid");
+        const productCards = Array.from(document.querySelectorAll(".product-card"));
+
+        function sortProducts() {
+            const sortValue = sortSelect.value;
+
+            let sortedCards = [...productCards];
+
+            if (sortValue === "low-to-high") {
+                sortedCards.sort((a, b) => parseFloat(a.dataset.price) - parseFloat(b.dataset.price));
+            } else if (sortValue === "high-to-low") {
+                sortedCards.sort((a, b) => parseFloat(b.dataset.price) - parseFloat(a.dataset.price));
+            } else if (sortValue === "best-rated") {
+                sortedCards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+            }
+
+            // Re-append sorted cards to the grid
+            productGrid.innerHTML = "";
+            sortedCards.forEach(card => {
+                productGrid.appendChild(card);
+            });
+        }
+
+        sortSelect.addEventListener("change", sortProducts);
+    });
+</script>

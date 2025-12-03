@@ -1,0 +1,108 @@
+﻿@model List<MeeshoWebClone.ViewModels.LikedProductViewModel>
+
+@{
+    ViewData["Title"] = "Liked Products";
+}
+
+<div class="container mt-4">
+    <h3 class="mb-3 fw-bold">
+        <i class="bi bi-heart text-danger mr-1"></i> Liked Products
+    </h3>
+
+    @if (!Model.Any())
+    {
+        <div class="d-flex flex-column align-items-center justify-content-center text-center py-5">
+            <i class="bi bi-heartbreak" style="font-size: 5rem; color: lightcoral;"></i>
+            <h5 class="fw-bolder text-dark mt-3">Your Liked Products List is Empty!</h5>
+            <p class="text-muted mb-4">Start adding your favorite products.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-light text-danger border border-1 fw-bold">
+                <i class="bi bi-shop mr-1"></i> Explore Products
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-12 col-md-12 mx-auto">
+                @foreach (var product in Model)
+                {
+                    <div class="list-group-item p-3 border rounded shadow-sm mb-3 @(product.StockQuantity == 0 ? "opacity-50" : "")">
+                        <div class="d-flex flex-column flex-md-row gap-3 position-relative">
+                            <!-- Product Image -->
+                            <img src="data:image/png;base64,@Convert.ToBase64String(product.FirstImage)"
+                                 class="img-thumbnail mr-md-3 mb-3 mb-md-0"
+                                 style="width: 120px; height: 120px; object-fit: cover;" />
+
+                            @if (product.StockQuantity == 0)
+                            {
+                                <span class="position-absolute top-0 start-0 badge bg-secondary text-white px-4 py-2 fw-bold shadow m-2"
+                                      style="font-size: 1rem;">
+                                    Out of Stock
+                                </span>
+                            }
+
+                            <!-- Product Details -->
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">
+                                    <a href="#" class="text-dark text-decoration-none">@product.Name</a>
+                                </h5>
+                                <small class="mb-2 d-flex text-muted">@product.Description</small>
+
+                                <!-- Pricing -->
+                                <div class="d-flex flex-column mb-2">
+                                    @if (product.DiscountPercentage > 0)
+                                    {
+                                        <p class="fw-bold text-danger mb-0" style="font-size: 1.4rem;">
+                                            ₹@product.DiscountedPrice <small class="text-muted fw-light" style="font-size: 0.9rem;">(@product.DiscountPercentage% OFF)</small>
+                                        </p>
+                                        <small class="text-muted" style="text-decoration: line-through;">₹@product.Price</small>
+                                    }
+                                    else
+                                    {
+                                        <p class="fw-bold text-dark" style="font-size: 1.4rem;">₹@product.Price</p>
+                                    }
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <!-- Stock Indicator -->
+                                    <small class="@(product.StockQuantity == 0 ? "text-secondary" : product.StockQuantity > 5 ? "text-success" : "text-danger")">
+                                        @(product.StockQuantity == 0 ? "Out of Stock" : product.StockQuantity > 5 ? "In Stock" : "Only " + product.StockQuantity + " left!")
+                                    </small>
+
+                                    <small class="text-muted align-baseline mb-0">Liked on: @product.LikedAt.ToString("dd MMM yyyy")</small>
+                                </div>
+
+                                <hr class="mt-1" />
+
+                                <!-- Buttons -->
+                                <div class="d-flex justify-content-end mt-2 gap-2">
+                                    <a asp-controller="Like" asp-action="Toggle" asp-route-id="@product.ProductId"
+                                       class="btn btn-sm btn-light text-danger border border-1 fw-bold">
+                                        <i class="bi bi-heartbreak"></i> Unlike
+                                    </a>
+
+                                    @if (!product.IsInCart)
+                                    {
+                                        @if (product.StockQuantity > 0)
+                                        {
+                                            <a asp-controller="Cart" asp-action="Update" asp-route-id="@product.ProductId" asp-route-change="1"
+                                               class="btn btn-sm btn-light text-success border border-1 fw-bold">
+                                                <i class="bi bi-cart-plus"></i> Move to Cart
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-light border border-1 fw-bold" disabled>
+                                                <i class="bi bi-cart-x"></i> Unavailable
+                                            </button>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

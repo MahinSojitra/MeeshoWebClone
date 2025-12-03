@@ -1,0 +1,149 @@
+﻿@model IEnumerable<MeeshoWebClone.ViewModels.ProductDisplayViewModel>
+
+@{
+    ViewData["Title"] = "Product Dashboard";
+    bool hasProducts = Model.Any(); // Check if there are products
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">All Products</h2>
+        <a asp-action="Create" class="btn btn-outline-success fw-bold">
+            <i class="bi bi-plus-circle"></i> Add Product
+        </a>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search products..."
+        @(hasProducts ? "" : "disabled")>
+    </div>
+
+    <!-- Product Table -->
+    <div class="table-responsive rounded overflow-auto">
+        <table class="table table-hover table-bordered text-center align-middle" id="productTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Price (₹)</th>
+                    <th>Stock</th>
+                    <th>Category</th>
+                    <th>Rating</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (hasProducts)
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <!-- Product Image -->
+                            <td>
+                                <img src="@(item.FirstImageData != null
+                                    ? $"data:image/png;base64,{Convert.ToBase64String(item.FirstImageData)}"
+                                    : "/images/no-image.png")"
+                                     alt="Product Image" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: contain;">
+                            </td>
+
+                            <!-- Product Name -->
+                            <td>@item.Name</td>
+
+                            <!-- Price -->
+                            <td>
+                                @if (item.DiscountPercentage == 0)
+                                {
+                                    <span class="fw-bold text-dark">₹@item.Price</span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger fw-bold me-1">₹@item.DiscountedPrice</span>
+                                    <del class="text-muted">₹@item.Price</del><br />
+                                    <small class="text-success">(@item.DiscountPercentage% OFF)</small>
+                                }
+                            </td>
+
+                            <!-- Stock -->
+                            <td>
+                                <span class="badge bg-@(item.StockQuantity > 0 ? "success" : "danger")">
+                                    @(item.StockQuantity > 0 ? "In Stock" : "Out of Stock")
+                                </span>
+                            </td>
+
+                            <!-- Category -->
+                            <td>@item.CategoryName</td>
+
+                            <!-- Rating -->
+                            <td>
+                                <span class="badge bg-success text-white">
+                                    <i class="bi bi-star-fill"></i> @item.Rating
+                                </span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="align-middle">
+                                <div class="d-flex justify-content-center align-items-center gap-1">
+                                    <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-sm btn-light text-success border border-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-sm btn-light text-black border border-1">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-sm btn-light text-danger border border-1">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3 fs-5">
+                            <i class="bi bi-box-seam me-1"></i> No products available
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript for Search Functionality -->
+@section Scripts {
+    <script>
+        document.getElementById("searchInput")?.addEventListener("keyup", function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll("#productTable tbody tr");
+
+            let visibleRows = 0;
+            rows.forEach(row => {
+                if (!row.innerHTML.includes("No products available")) {
+                    let text = row.innerText.toLowerCase();
+                    let isMatch = text.includes(filter);
+                    row.style.display = isMatch ? "" : "none";
+                    if (isMatch) visibleRows++;
+                }
+            });
+
+            // Show "No results found" message if no products match search
+            let noResultsRow = document.querySelector("#noResultsRow");
+            if (visibleRows === 0) {
+                if (!noResultsRow) {
+                    let tbody = document.querySelector("#productTable tbody");
+                    let newRow = document.createElement("tr");
+                    newRow.id = "noResultsRow";
+                    newRow.innerHTML = `<td colspan="7" class="text-center text-muted py-3 fs-5">
+                                            <i class="bi bi-box-seam me-1"></i> No matching products found
+                                        </td>`;
+                    tbody.appendChild(newRow);
+                }
+            } else {
+                if (noResultsRow) noResultsRow.remove();
+            }
+        });
+    </script>
+}

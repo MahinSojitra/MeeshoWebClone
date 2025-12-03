@@ -1,0 +1,10 @@
+﻿@model MeeshoWebClone.ViewModels.ProductPageViewModel
+
+<div class="col-md-9">
+    <div class="row flex-wrap" id="productGrid" style="max-height: 100vh; overflow-y: auto;">
+        @foreach (var product in Model.Products)
+        {
+            @await Html.PartialAsync("_ProductCard", product)
+        }
+    </div>
+</div>

@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
+
+@model MeeshoWebClone.Areas.Admin.ViewModels.AdminDashboardViewModel
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
+    bool isAdmin = roles.Contains("Admin");
+
+    ViewData["Title"] = isAdmin ? "Admin Home" : "Seller Home";
+}
+
+@if (isAdmin)
+{
+    <partial name="_PendingUserVerifications" model="@Model.VerificationPendingUsers" />
+}

@@ -1,0 +1,118 @@
+﻿@model List<ProductCategory>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="col-md-3">
+    <div class="card border-1 p-3 d-flex flex-column" style="height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4 px-1">
+            <h4 class="fw-bold mb-0 text-dark">Filters</h4>
+            <button id="clearFilters" class="btn btn-sm btn-light text-danger border border-1">
+                <i class="bi bi-x-circle-fill"></i> Clear
+            </button>
+        </div>
+
+        <!-- Search Box -->
+        <div class="input-group mb-3">
+            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchCategory" class="form-control" placeholder="Search category">
+        </div>
+
+        <!-- Categories List -->
+        <ul class="list-group list-group-flush overflow-auto flex-grow-1" id="categoryList" style="max-height: 100%;">
+            @foreach (var category in Model)
+            {
+                <li class="list-group-item d-flex align-items-center border-0 pl-4 py-2 category-item">
+                    <input type="checkbox" class="form-check-input me-3" style="transform: scale(1.2);">
+                    <span class="fw-medium category-name">@category.Name</span>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchCategory");
+        const categoryList = document.getElementById("categoryList");
+        const productCards = document.querySelectorAll(".product-card");
+        const productGrid = document.getElementById("productGrid");
+        const checkboxes = document.querySelectorAll(".category-item input[type='checkbox']");
+        const clearBtn = document.getElementById("clearFilters");
+
+        // Category Search Filter
+        function filterCategories() {
+            const filter = searchInput.value.trim().toLowerCase();
+            const items = categoryList.querySelectorAll(".category-item");
+            let matchCount = 0;
+
+            items.forEach(item => {
+                const name = item.querySelector(".category-name").textContent.trim().toLowerCase();
+                const isMatch = name.includes(filter);
+
+                if (isMatch) {
+                    item.classList.remove("d-none");
+                    matchCount++;
+                } else {
+                    item.classList.add("d-none");
+                }
+            });
+
+            let noMatch = document.getElementById("noCategoryMatch");
+            if (matchCount === 0) {
+                if (!noMatch) {
+                    const noItem = document.createElement("li");
+                    noItem.id = "noCategoryMatch";
+                    noItem.className = "list-group-item text-muted text-center py-3";
+                    noItem.innerHTML = `<i class="bi bi-tags"></i> No matching categories found`;
+                    categoryList.appendChild(noItem);
+                }
+            } else {
+                if (noMatch) noMatch.remove();
+            }
+        }
+
+        // Product Category Filter
+        function filterProductsByCategory() {
+            const selectedCategories = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.nextElementSibling.textContent.trim().toLowerCase());
+
+            let visibleCount = 0;
+
+            productCards.forEach(card => {
+                const cardCategory = card.getAttribute("data-category");
+                const isVisible = selectedCategories.length === 0 || selectedCategories.includes(cardCategory);
+
+                if (isVisible) {
+                    card.classList.remove("d-none");
+                    visibleCount++;
+                } else {
+                    card.classList.add("d-none");
+                }
+            });
+
+            // Remove old no-product message
+            const oldMsg = document.getElementById("noProductMessage");
+            if (oldMsg) oldMsg.remove();
+
+            // If none visible, show message
+            if (visibleCount === 0) {
+                const msg = document.createElement("div");
+                msg.id = "noProductMessage";
+                msg.className = "text-center text-muted fs-5 w-100 py-5";
+                msg.innerHTML = `<i class="bi bi-box-seam fs-1 me-1"></i> <br /> No products found. clear filters.`;
+                productGrid.appendChild(msg);
+            }
+        }
+
+        clearBtn.addEventListener("click", function () {
+            location.reload();
+        });
+
+        // Events
+        searchInput.addEventListener("input", filterCategories);
+        checkboxes.forEach(cb => cb.addEventListener("change", filterProductsByCategory));
+
+        // Initial call
+        filterProductsByCategory();
+    });
+</script>

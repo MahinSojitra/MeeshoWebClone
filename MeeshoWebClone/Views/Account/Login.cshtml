@@ -1,0 +1,137 @@
+﻿@model MeeshoWebClone.ViewModels.LoginViewModel
+
+@{
+    ViewBag.Title = "Login";
+    var signedOut = Context.Request.Query["signedOut"];
+    var accountCreated = Context.Request.Query["accountCreated"];
+    var deleted = Context.Request.Query["deleted"];
+    var accountVerified = Context.Request.Query["accountVerified"];
+}
+
+<div class="container mt-5">
+    <div class="card p-4 shadow mx-auto" style="max-width: 40%;">
+            <h5 class="mb-0 text-center">Welcome!</h5>
+            <span class="text-muted text-center d-block">Sign in to your account.</span>
+            <hr class="mt-2" />
+                
+            <form asp-action="Login" asp-controller="Account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                @if (!string.IsNullOrEmpty(signedOut) && signedOut == "True")
+                {
+                    <div class="alert alert-success small p-2">
+                        <i class="bi bi-check-circle-fill mr-1 ml-2"></i> You have been signed out.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(accountCreated) && accountCreated == "True")
+                {
+                    <div class="alert alert-success small p-2">
+                        <i class="bi bi-check-circle-fill mr-1 ml-2"></i> Account is created! Please login to continue.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(deleted) && deleted == "True")
+                {
+                    <div class="alert alert-success small p-2">
+                        <i class="bi bi-check-circle-fill mr-1 ml-2"></i> Your account has been deleted.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(accountVerified) && accountVerified == "False")
+                {
+                    <div class="alert alert-warning small p-2 d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                        Your account is not verified and needs admin approval to access.
+                    </div>
+                }
+
+                @* Hidden field to track the last selected login method *@
+                <input type="hidden" id="loginMethod" name="LoginMethod" value="email" />
+
+                <div class="btn-group w-100 mb-3" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-success active" id="phoneLoginBtn">
+                        <i class="bi bi-phone"></i> Login with Phone
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success" id="emailLoginBtn">
+                        <i class="bi bi-envelope"></i> Login with Email
+                    </button>
+                </div>
+
+                <div id="phoneLogin">
+                    <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text">+91</span>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                    </div>
+                    <span asp-validation-for="PhoneNumber" class="text-danger error-font"></span>
+                </div>
+
+                <div id="emailLogin" class="d-none">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                    <span asp-validation-for="Email" class="text-danger error-font"></span>
+
+                    <label asp-for="Password" class="form-label d-block mt-2">Password</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Enter password" />
+                    <span asp-validation-for="Password" class="text-danger error-font"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label small">Remember me?</label>
+                    </div>
+                    <a class="text-decoration-none small" asp-controller="Account" asp-action="Verify">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success w-100">Continue</button>
+                </div>
+
+                @* Signup Link *@
+                <div class="text-center mt-2 small">
+                    Don't have an account?
+                    <a class="text-decoration-none" asp-controller="Account" asp-action="Signup">Signup here</a>
+                </div>
+            </form>
+        </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let phoneLoginBtn = document.getElementById("phoneLoginBtn");
+            let emailLoginBtn = document.getElementById("emailLoginBtn");
+            let phoneLogin = document.getElementById("phoneLogin");
+            let emailLogin = document.getElementById("emailLogin");
+            let loginMethod = document.getElementById("loginMethod");
+
+            function setLoginTab(method) {
+                if (method === "phone") {
+                    phoneLogin.classList.remove("d-none");
+                    emailLogin.classList.add("d-none");
+                    phoneLoginBtn.classList.add("active");
+                    emailLoginBtn.classList.remove("active");
+                    loginMethod.value = "phone";
+                } else {
+                    phoneLogin.classList.add("d-none");
+                    emailLogin.classList.remove("d-none");
+                    phoneLoginBtn.classList.remove("active");
+                    emailLoginBtn.classList.add("active");
+                    loginMethod.value = "email";
+                }
+            }
+
+            phoneLoginBtn.addEventListener("click", () => setLoginTab("phone"));
+            emailLoginBtn.addEventListener("click", () => setLoginTab("email"));
+
+            let lastLoginMethod = "@(ViewBag.LastLoginMethod ?? "phone")";
+            setLoginTab(lastLoginMethod);
+        });
+    </script>
+}

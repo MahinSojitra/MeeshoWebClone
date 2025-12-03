@@ -1,0 +1,202 @@
+﻿@model IEnumerable<MeeshoWebClone.Areas.Admin.ViewModels.UserDisplayViewModel>
+@using MeeshoWebClone.Enums
+
+@{
+    ViewData["Title"] = "User Dashboard";
+    bool hasUsers = Model.Any();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">All Users</h2>
+
+        <!-- Toggle Deleted Users Button -->
+        <button id="toggleDeletedUsersBtn" class="btn btn-sm btn-outline-light text-danger border border-1">
+            Show Deleted
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search users..." 
+        @(hasUsers ? "" : "disabled")>
+    </div>
+
+    <!-- User Table -->
+    <div class="table-responsive rounded overflow-auto">
+        <table class="table table-hover table-bordered text-center align-middle" id="userTable">
+            <thead class="table-light">
+                <tr>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                @if (hasUsers)
+                {
+                    bool hasActiveUsers = false;
+                    @foreach (var item in Model)
+                    {
+                        if (!item.IsDeleted)
+                        {
+                            hasActiveUsers = true;
+                        }
+
+                        <tr data-isdeleted="@item.IsDeleted.ToString().ToLower()" 
+                            style="@(item.IsDeleted ? "display: none;" : "")">
+                            <td>@item.UserName</td>
+                            <td>@item.Email</td>
+                            <td>+91-@item.PhoneNumber</td>
+                            <td>@item.Role</td>
+                            <td>
+                                <span class="badge bg-light text-@(
+                                    item.Status == VerificationStatus.Approved ? "success" :
+                                    item.Status == VerificationStatus.Rejected ? "danger" :
+                                    "secondary"
+                                ) border border-2 p-1">
+                                    <i class="bi bi-@(
+                                        item.Status == VerificationStatus.Approved ? "check-circle-fill text-success" :
+                                        item.Status == VerificationStatus.Rejected ? "x-circle-fill text-danger" :
+                                        "clock-fill text-secondary"
+                                    )"></i>
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    @if (item.Status == VerificationStatus.Pending)
+                                    {
+                                        <a asp-action="Approve" asp-route-id="@item.Id" class="btn btn-sm btn-light text-success border border-1" title="Approve">
+                                            <i class="bi bi-check-circle"></i>
+                                        </a>
+                                        <a asp-action="Reject" asp-route-id="@item.Id" class="btn btn-sm btn-light text-danger border border-1" title="Reject">
+                                            <i class="bi bi-x-circle"></i>
+                                        </a>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border border-1" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light text-danger border border-1" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    // Show message if no active users exist
+                    if (!hasActiveUsers)
+                    {
+                        <tr id="noUsersRow">
+                            <td colspan="6" class="text-center text-muted py-3 fs-5">
+                                <i class="bi bi-person-x me-1"></i> No users available
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr id="noUsersRow">
+                        <td colspan="6" class="text-center text-muted py-3 fs-5">
+                            <i class="bi bi-person-x me-1"></i> No users available
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript for Toggle and Search -->
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let toggleDeletedBtn = document.getElementById("toggleDeletedUsersBtn");
+            let searchInput = document.getElementById("searchInput");
+            let showDeleted = false; // Default: hide deleted users
+            let noUsersRow = document.getElementById("noUsersRow");
+
+            // Toggle Deleted Users Button
+            toggleDeletedBtn.addEventListener("click", function () {
+                showDeleted = !showDeleted; // Toggle state
+                let rows = document.querySelectorAll("#userTable tbody tr[data-isdeleted]");
+
+                let hasVisibleUsers = false;
+                rows.forEach(row => {
+                    let isDeleted = row.getAttribute("data-isdeleted") === "true";
+
+                    if (isDeleted) {
+                        row.style.display = showDeleted ? "" : "none";
+                    }
+
+                    // Check if there are any visible users
+                    if (row.style.display !== "none") {
+                        hasVisibleUsers = true;
+                    }
+                });
+
+                // Show "No Users Available" only if no visible users exist
+                if (!hasVisibleUsers) {
+                    if (!document.getElementById("noUsersRow")) {
+                        let tbody = document.querySelector("#userTable tbody");
+                        let newRow = document.createElement("tr");
+                        newRow.id = "noUsersRow";
+                        newRow.innerHTML = `<td colspan="6" class="text-center text-muted py-3 fs-5">
+                                                <i class="bi bi-person-x me-1"></i> No users available
+                                            </td>`;
+                        tbody.appendChild(newRow);
+                    }
+                } else {
+                    document.getElementById("noUsersRow")?.remove();
+                }
+
+                // Update button text
+                toggleDeletedBtn.innerHTML = showDeleted ? `Hide Deleted` : `Show Deleted`;
+            });
+
+            // Search Users
+            searchInput?.addEventListener("keyup", function () {
+                searchUsers();
+            });
+
+            function searchUsers() {
+                let filter = searchInput.value.toLowerCase();
+                let rows = document.querySelectorAll("#userTable tbody tr[data-isdeleted]");
+
+                let visibleRows = 0;
+                rows.forEach(row => {
+                    let isDeleted = row.getAttribute("data-isdeleted") === "true";
+                    let text = row.innerText.toLowerCase();
+                    let isMatch = text.includes(filter);
+
+                    if ((!isDeleted || showDeleted) && isMatch) {
+                        row.style.display = "";
+                        visibleRows++;
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+
+                // Show "No results found" message if no users match search
+                let noResultsRow = document.querySelector("#noResultsRow");
+                if (visibleRows === 0) {
+                    if (!noResultsRow) {
+                        let tbody = document.querySelector("#userTable tbody");
+                        let newRow = document.createElement("tr");
+                        newRow.id = "noResultsRow";
+                        newRow.innerHTML = `<td colspan="6" class="text-center text-muted py-3 fs-5">
+                                                <i class="bi bi-person-x me-1"></i> No matching users found
+                                            </td>`;
+                        tbody.appendChild(newRow);
+                    }
+                } else {
+                    document.getElementById("noResultsRow")?.remove();
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,31 @@
+﻿@model MeeshoWebClone.ViewModels.OTPViewModel
+
+@{
+    ViewBag.Title = "Verify OTP";
+}
+
+<div class="container mt-4">
+    <div class="card p-4 shadow mx-auto" style="max-width:40%">
+        <h5 class="mb-0 text-center">OTP Verification</h5>
+        <span class="text-muted text-center d-block">Verify your identity to continue.</span>
+        <hr class="mt-2" />
+        <form asp-action="Verify" asp-controller="Account" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <label asp-for="OTP" class="form-label">Enter OTP to Continue</label>
+            <div class="input-group flex-nowrap">
+                <span class="input-group-text">OTP</span>
+                <input asp-for="OTP" class="form-control" value="@Model?.OTP" placeholder="Enter 4 digit otp" maxlength="4"/>
+            </div>
+            <span asp-validation-for="OTP" class="text-danger error-font"></span>
+            <div class="form-group mt-4">
+                <input type="submit" value="Continue" class="btn btn-sm btn-success w-100" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

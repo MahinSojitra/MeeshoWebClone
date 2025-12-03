@@ -1,0 +1,114 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
+    bool isAdmin = roles.Contains("Admin");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Meesho</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar bg-body-tertiary border-bottom">
+            <div class="container align-content-between">
+                <a class="navbar-brand text-dark" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                    <img src="~/assets/meesho-logo.svg" alt="Logo" width="156" height="36" class="d-block">
+                    &nbsp; &nbsp; &nbsp; &nbsp;@((isAdmin) ? "Admin Panel" : " Seller Panel")
+                </a>
+
+                <div>
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-success fw-bold me-1">
+                        <i class="bi bi-globe2 me-1"></i> Website
+                    </a>
+                    <a asp-area="" asp-controller="Account" asp-action="Logout" class="btn btn-light text-success fw-bold border border-2 me-1" title="Logout">
+                        <i class="bi bi-door-closed"></i>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    @{
+        string currentController = ViewContext.RouteData.Values["controller"]?.ToString()!;
+    }
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="offcanvasExampleLabel">Admin Controls</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <div class="offcanvas-body">
+            <h5 class="text-muted mb-0">
+                <i class="bi bi-house-door-fill me-1"></i> Home
+            </h5>
+            <hr class="mt-2" />
+            <div class="nav flex-column nav-pills w-100 gap-2" id="admin-tab" role="tablist" aria-orientation="vertical">
+                <a asp-controller="Home" asp-action="Index"
+                   class="nav-link border border-1 @(currentController == "Home" ? "active bg-success text-white" : "text-success")">
+                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                </a>
+            </div>
+
+            @if (isAdmin)
+            {
+                <h5 class="text-muted mb-0 mt-4">
+                    <i class="bi bi-person-fill-gear me-1"></i> Manage Application Users
+                </h5>
+                <hr class="mt-2" />
+                <div class="nav flex-column nav-pills w-100 gap-2" id="admin-tab" role="tablist" aria-orientation="vertical">
+                    <a asp-controller="User" asp-action="Index"
+                       class="nav-link border border-1 @(currentController == "User" ? "active bg-success text-white" : "text-success")">
+                        <i class="bi bi-people me-1"></i> Users
+                    </a>
+                </div>
+            }
+
+            <h5 class="text-muted mb-0 mt-4">
+                <i class="bi bi-bar-chart-fill me-1"></i> Management Store
+            </h5>
+            <hr class="mt-2" />
+            <div class="nav flex-column nav-pills w-100 gap-2" id="admin-tab" role="tablist" aria-orientation="vertical">
+                <a asp-controller="Product" asp-action="Index"
+                   class="nav-link border border-1 @(currentController == "Product" ? "active bg-success text-white" : "text-success")">
+                    <i class="bi bi-box-seam me-1"></i> Products
+                </a>
+
+                @if (isAdmin)
+                {
+                    <a asp-controller="Category" asp-action="Index"
+                       class="nav-link border border-1 @(currentController == "Category" ? "active bg-success text-white" : "text-success")">
+                        <i class="bi bi-tags me-1"></i> Categories
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-2">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

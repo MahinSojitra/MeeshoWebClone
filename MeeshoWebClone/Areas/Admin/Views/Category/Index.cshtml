@@ -1,0 +1,104 @@
+﻿@model IEnumerable<MeeshoWebClone.Models.ProductCategory>
+
+@{
+    ViewData["Title"] = "Category Dashboard";
+    bool hasCategories = Model.Any(); // Check if there are categories
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">All Product Categories</h2>
+        <a asp-action="Create" class="btn btn-outline-success fw-bold">
+            <i class="bi bi-plus-circle"></i> Add Category
+        </a>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control border border-success"
+               placeholder="Search categories..." @(hasCategories ? "" : "disabled")>
+    </div>
+
+    <!-- Category Table -->
+    <div class="table-responsive rounded overflow-auto">
+        <table class="table table-hover table-bordered text-center align-middle" id="categoryTable">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Id</th>
+                    <th>Category Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (hasCategories)
+                {
+                    int count = 1;
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@count</td>
+
+                            <td class="fw-bold">@item.Id</td>
+
+                            <td class="fw-bold">@item.Name</td>
+
+                            <td>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light text-danger border border-1">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        count++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3 fs-5">
+                            <i class="bi bi-folder-x me-1"></i> No categories available
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript for Search Functionality -->
+@section Scripts {
+    <script>
+        document.getElementById("searchInput")?.addEventListener("keyup", function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll("#categoryTable tbody tr");
+
+            let visibleRows = 0;
+            rows.forEach(row => {
+                if (!row.innerHTML.includes("No categories available")) {
+                    let text = row.innerText.toLowerCase();
+                    let isMatch = text.includes(filter);
+                    row.style.display = isMatch ? "" : "none";
+                    if (isMatch) visibleRows++;
+                }
+            });
+
+            // Show "No results found" message if no categories match search
+            let noResultsRow = document.querySelector("#noResultsRow");
+            if (visibleRows === 0) {
+                if (!noResultsRow) {
+                    let tbody = document.querySelector("#categoryTable tbody");
+                    let newRow = document.createElement("tr");
+                    newRow.id = "noResultsRow";
+                    newRow.innerHTML = `<td colspan="4" class="text-center text-muted py-3 fs-5">
+                                            <i class="bi bi-folder-x me-1"></i> No matching categories found
+                                        </td>`;
+                    tbody.appendChild(newRow);
+                }
+            } else {
+                if (noResultsRow) noResultsRow.remove();
+            }
+        });
+    </script>
+}

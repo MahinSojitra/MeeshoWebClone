@@ -1,0 +1,77 @@
+﻿@model MeeshoWebClone.ViewModels.SignupViewModel
+
+@{
+    ViewBag.Title = "Signup";
+}
+
+<div class="container mt-5">
+    <div class="card p-4 shadow mx-auto" style="max-width: 40%">
+        <h5 class="mb-0 text-center">Create Your Account</h5>
+        <span class="text-muted text-center d-block">Fill in your details to sign up.</span>
+        <hr class="mt-2" />
+
+        <form asp-action="Signup" asp-controller="Account" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Phone Number -->
+            <div class="mb-3">
+                <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                <div class="input-group">
+                    <span class="input-group-text">+91</span>
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
+                </div>
+                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <!-- Seller Checkbox -->
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="isSeller">
+                <label class="form-check-label" for="isSeller">Sign up as a Seller</label>
+            </div>
+
+            <!-- Hidden Input for Role -->
+            <input type="hidden" asp-for="Role" id="roleInput" value="User">
+
+            <!-- Submit Button -->
+            <div class="form-group">
+                <input type="submit" value="Sign Up" class="btn btn-success w-100" />
+            </div>
+
+            <!-- Already have an account? -->
+            <div class="text-center mt-2 small">
+                Already have an account? <a asp-action="Login" asp-controller="Account" class="text-decoration-none">Login here</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById('isSeller').addEventListener('change', function () {
+            document.getElementById('roleInput').value = this.checked ? 'Seller' : 'User';
+        });
+    </script>
+}

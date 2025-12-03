@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+body {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 500;
+}
+
+/* Search Container */
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.search-box {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+    .search-box i {
+        font-size: 18px;
+        color: #888;
+        margin-right: 0px;
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 14px;
+        background: transparent;
+    }
+
+    .search-box .form-control:focus {
+        box-shadow: none !important;
+        background-color: transparent;
+    }
+
+/* Dropdown Styling */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 10;
+}
+
+.search-pill {
+    display: inline-block;
+    background: #f1f1f1;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.search-pill:hover {
+    background: #ddd;
+}
+
+.navbar .nav-link {
+    font-size: 16px;
+    color: #333;
+    padding: 5px 5px;
+    display: flex;
+    align-items: center;
+}
+
+.navbar .nav-link i {
+    margin-right: 5px;
+}
+
+.divider {
+    height: 40px;
+    width: 2px;
+    background-color: #bbb;
+    display: inline-block;
+    margin: 0 10px;
+    vertical-align: middle;
+}
+
+.signup .dropdown-menu {
+    min-width: 250px;
+    border-radius: 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sign-up-btn {
+    background-color: #9c277d;
+    border-color: #9c277d;
+    color: white;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.sign-up-btn:hover {
+    background-color: #7c1f63;
+    border-color: #7c1f63;
+}
+
+.text-danger {
+    font-weight: bold;
+}
+
+.icon-size {
+    font-size: 24px;
+}
+
+.small-nav {
+    font-size: 14px;
+    color: purple;
+    padding: 0;
+}
+
+.small-nav .nav-link {
+    padding: 10px 15px;
+    color: #333;
+    font-weight: 500;
+}
+
+.small-nav .nav-link:hover {
+    color: purple;
+}
+
+.small-nav .active {
+    font-weight: bold;
+}
+
+.active {
+    font-weight: bold;
+    color: purple;
+}
+
+/* Ensure the dropdown parent has proper positioning */
+.mega-dropdown {
+    position: relative;
+}
+
+/* Mega Menu */
+.mega-menu {
+    display: none;
+    position: absolute;
+    width: auto;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Show menu on hover or focus */
+.mega-dropdown:hover .mega-menu,
+.mega-dropdown:focus-within .mega-menu {
+    display: block;
+}
+
+/* Flex for Proper Column Layout */
+.mega-menu .row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.mega-menu .col {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/* Category Headings */
+.mega-menu h6 {
+    font-size: 15px;
+    font-weight: bold;
+    color: purple;
+    padding-bottom: 5px;
+}
+
+/* Dropdown Items */
+.mega-menu .dropdown-item {
+    font-size: 14px;
+    padding: 4px 0;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* Hover Effect */
+.mega-menu .dropdown-item:hover {
+    color: purple;
+}
+
+/* Ensure dropdown remains open when hovering over it */
+.mega-dropdown:hover .mega-menu,
+.mega-dropdown:focus-within .mega-menu {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .mega-menu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+    }
+    .mega-menu .row {
+        flex-wrap: wrap;
+    }
+}
+
+.navbar .nav-link {
+    position: relative;
+    padding-bottom: 5px;
+    text-decoration: none;
+    height: 100%;
+}
+
+/* Underline on hover and active state */
+.navbar .nav-link::after {
+    content: "";
+    display: block;
+    width: 0;
+    height: 3px;
+    background: #9c277d; /* Purple color */
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+.navbar .nav-link:hover {
+    font-weight: bold;
+}
+
+.navbar .nav-link:hover::after,
+.navbar .nav-link.active::after {
+    width: 100%;
+}
+
+.small-font {
+    font-size: 14px;
+}
+
+.error-font {
+    font-size: 14px;
+}
+
+/* Add to Cart Button */
+.add-to-cart {
+    display: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.product-card:hover .add-to-cart {
+    display: block;
+}
+
+/* Free Delivery Badge */
+.badge {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 6px;
+}

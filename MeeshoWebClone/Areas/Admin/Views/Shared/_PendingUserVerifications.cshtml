@@ -1,0 +1,56 @@
+﻿@model IEnumerable<MeeshoWebClone.Areas.Admin.ViewModels.VerificationPendingUserViewModel>
+
+<div class="accordion" id="pendingVerificationAccordion">
+    <div class="accordion-item shadow-sm">
+        <h2 class="accordion-header" id="headingPendingVerifications">
+            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePendingVerifications" aria-expanded="false" aria-controls="collapsePendingVerifications">
+                <i class="bi bi-clock-fill me-2"></i> Pending Verifications
+                <span class="badge bg-success ms-2">@Model.Count()</span>
+            </button>
+        </h2>
+        <div id="collapsePendingVerifications" class="accordion-collapse collapse" aria-labelledby="headingPendingVerifications" data-bs-parent="#pendingVerificationAccordion">
+            <div class="accordion-body">
+                @if (Model.Any())
+                {
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                        @foreach (var user in Model)
+                        {
+                            <div class="col">
+                                <div class="card p-3 rounded-3 shadow-sm d-flex flex-column" style="background: linear-gradient(135deg, rgba(225, 238, 255, 0.7), rgba(255, 255, 255, 0.7));">
+                                    <div class="d-flex align-items-top mb-3 mt-2">
+                                        <div class="rounded-circle overflow-hidden border border-2 me-3" style="width: 65px; height: 65px;">
+                                            <img src="~/assets/user-avatar.png" class="w-100 h-100 object-fit-cover" alt="User Avatar">
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 fw-semibold text-dark" style="font-size: 1.2rem;">@user.UserName</h6>
+                                            <p class="mb-2 text-muted" style="font-size: 0.9rem;">+91 @user.PhoneNumber</p>
+                                            <span class="badge bg-light text-secondary border border-1 p-1">
+                                                <i class="bi bi-clock-fill text-secondary"></i> Pending
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-auto d-flex justify-content-end">
+                                        <a asp-controller="User" asp-action="Approve" asp-route-id="@user.Id" class="btn btn-success btn-sm me-1">
+                                            <i class="bi bi-check-circle"></i> Approve
+                                        </a>
+                                        <a asp-controller="User" asp-action="Reject" asp-route-id="@user.Id" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-ban"></i> Reject
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex align-items-center justify-content-center" style="height: 80px;">
+                        <p class="text-muted fw-semibold mb-0">
+                            <i class="bi bi-clock-history me-1"></i> No pending verifications
+                        </p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
