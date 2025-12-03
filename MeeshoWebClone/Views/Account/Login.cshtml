@@ -6,6 +6,10 @@
     var accountCreated = Context.Request.Query["accountCreated"];
     var deleted = Context.Request.Query["deleted"];
     var accountVerified = Context.Request.Query["accountVerified"];
+    var passwordReset = Context.Request.Query["passwordReset"];
+    var emailVerificationSent = Context.Request.Query["emailVerificationSent"];
+    var emailConfirmed = Context.Request.Query["emailConfirmed"];
+    var emailConfirmationFailed = Context.Request.Query["emailConfirmationFailed"];
 }
 
 <div class="container mt-5">
@@ -46,6 +50,34 @@
                     </div>
                 }
 
+                @if (!string.IsNullOrEmpty(passwordReset) && passwordReset == "True")
+                {
+                    <div class="alert alert-success small p-2">
+                        <i class="bi bi-check-circle-fill mr-1 ml-2"></i> Your password has been reset successfully. Please login with your new password.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(emailVerificationSent) && emailVerificationSent == "True")
+                {
+                    <div class="alert alert-info small p-2">
+                        <i class="bi bi-envelope-check-fill mr-1 ml-2"></i> Account created! Please check your email and click the verification link to activate your account.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(emailConfirmed) && emailConfirmed == "True")
+                {
+                    <div class="alert alert-success small p-2">
+                        <i class="bi bi-check-circle-fill mr-1 ml-2"></i> Email verified successfully! You can now login to your account.
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(emailConfirmationFailed) && emailConfirmationFailed == "True")
+                {
+                    <div class="alert alert-danger small p-2">
+                        <i class="bi bi-x-circle-fill mr-1 ml-2"></i> Email verification failed. The link may be invalid or expired.
+                    </div>
+                }
+
                 @* Hidden field to track the last selected login method *@
                 <input type="hidden" id="loginMethod" name="LoginMethod" value="email" />
 
@@ -82,7 +114,7 @@
                         <input asp-for="RememberMe" class="form-check-input" />
                         <label asp-for="RememberMe" class="form-check-label small">Remember me?</label>
                     </div>
-                    <a class="text-decoration-none small" asp-controller="Account" asp-action="Verify">
+                    <a class="text-decoration-none small" asp-controller="Account" asp-action="ForgotPassword">
                         Forgot password?
                     </a>
                 </div>
