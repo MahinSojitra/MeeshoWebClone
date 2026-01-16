@@ -105,12 +105,12 @@ dotnet restore
 
 ### Create Migrations
 ```bash
-dotnet ef migrations add <MigrationName> --project MeeshoWebClone
+dotnet ef migrations add <MigrationName> --project MeeshoWebClone --context MeeshoAppDbContext
 ```
 
 ### Update Database
 ```bash
-dotnet ef database update --project MeeshoWebClone
+dotnet ef database update --project MeeshoWebClone --context MeeshoAppDbContext
 ```
 
 ## Authentication & Authorization
